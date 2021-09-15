@@ -1,20 +1,20 @@
 #Load library and data
-library(dplyr)
 library(lubridate)
 library(BTYDplus)
 library(BTYD)
 library(plyr)
 library(reshape2)
 library(ggplot2)
+library(dplyr)
 
 data <- read.table('CDNOW_master.txt', sep = "", header=FALSE, na.strings = "", stringsAsFactors = FALSE)
-data_tbl <- as_tibble(data) %>%
-  rename(cust = V1) %>%
-  mutate(date = as.Date(as.character(V2), format = '%Y%m%d')) %>%
-  select(-V2) %>%
-  rename(orders = V3) %>%
-  rename(sales = V4) %>%
-  glimpse()
+data_tbl <- dplyr::as_tibble(data) %>%
+  dplyr::rename(cust = V1) %>%
+  dplyr::mutate(date = as.Date(as.character(V2), format = '%Y%m%d')) %>%
+  dplyr::select(-V2) %>%
+  dplyr::rename(orders = V3) %>%
+  dplyr::rename(sales = V4) %>%
+  dplyr::glimpse()
 
 #Re-transform tibble back to data.frame as BTYDplus package runs better with this format
 data_df <- as.data.frame(data_tbl)
@@ -29,7 +29,7 @@ elog <- BTYD::dc.MergeTransactionsOnSameDate(elog)
 #head(elog)
 #summary(elog)
 
-#Divide data between calibration and holdout periods
+#Divide data between calibration and holdout periods and print using ()
 (end.of.cal.period = as.Date('1998-03-24'))
 #(end.of.cal.period <- min(elog$date) + as.numeric((max(elog$date) - min(elog$date))/2))
 #(end.of.cal.period <- min(elog$date) + as.numeric((max(elog$date) - min(elog$date))/1))
@@ -55,7 +55,7 @@ str(cal2.cbs)
 #initial parms
 (params2 <- BTYD::pnbd.EstimateParameters(cal2.cbs))
 
-#Get log likelihood
+#Get log likelihood for the above parameters estimation
 (LL <- BTYD::pnbd.cbs.LL(params2, cal2.cbs))
 
 #Make series of estimates (optimization) to get params to converge to get optimal params for gamma distribution
@@ -74,7 +74,7 @@ p.matrix
 (params2 <- p.matrix[dim(p.matrix)[1], 1:4])
 
 #Estimate the # of txn a new customer will make in 52 weeks
-BTYD::pnbd.Expectation(params2, t=52) #about 2-3 times
+BTYD::pnbd.Expectation(params2, t=52) #results should be about X times in 52 weeks
 
 #Calibrate and predict for all customers
 x<- cal2.cbs[,'x'] #recall cal2.cbs is calibration period all cust
@@ -90,14 +90,14 @@ pnbd_rdf$pnbd_expected_txn <- BTYD::pnbd.ConditionalExpectedTransactions(params2
 
 #get predicted CLV scores by aov * expected_txn by each customer
 get_avg_sales <- dplyr::as_tibble(elog) %>%
-  group_by(cust) %>%
-  summarise(avg_sales = mean(sales)) %>%
-  glimpse()
+  dplyr::group_by(cust) %>%
+  dplyr::summarise(avg_sales = mean(sales)) %>%
+  dplyr::glimpse()
 
 pnbd_tbl <- dplyr::as_tibble(pnbd_rdf) %>%
-  left_join(get_avg_sales, by = c("cust" = "cust")) %>%
-  mutate(predicted_clv = pnbd_expected_txn * avg_sales) %>%
-  glimpse()
+  dplyr::left_join(get_avg_sales, by = c("cust" = "cust")) %>%
+  dplyr::mutate(predicted_clv = pnbd_expected_txn * avg_sales) %>%
+  dplyr::glimpse()
 
 pnbd_rdf <- as.data.frame(pnbd_tbl) # OK I think this is good enough for Git post
 
@@ -118,9 +118,9 @@ ggplot2::ggplot(as.data.frame(p.alives), ggplot2::aes(x=p.alives)) +
   ggplot2::theme_minimal()
 
 
-  #Access how well the model does against the holdout period
+  #Assess how well the model does against the holdout period
   x.star <- data[[2]][[2]][,1]
-  cal2.cbs <-cbind(cal2.cbs, x.star)
+  cal2.cbs <- cbind(cal2.cbs, x.star)
 
   holdoutdates <- attributes(data[[2]][[1]])[[2]][[2]]
   holdoutlength <- round(as.numeric(max(as.Date(holdoutdates)) - min(as.Date(holdoutdates)))/7)
