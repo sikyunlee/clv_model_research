@@ -2,7 +2,7 @@
 ## Goal: Building BTYD models and comparing with traditional Cohort LTV predictions and deriving actionable insights from the results
 
 ### Introduction
-For decades, the BTYD (Buy Til' You Die) model has been released through whitepapers, ranging from BG-NBD (Beta Gamma Negative Binomial Distribution), PNBD (Pareto Negative Binomial Distribution) and up to the latest model being the PGGG (Pareto Gamma Gamma Gamma) model. In this repo, the goal is to build the popular model (BGNBD) and the gold standard model (PNBD) model to compare with the traditional Cohort-based CLV estimating model. Additionally, some way to deliver actionable insights is provided at the end.
+For decades, the BTYD (Buy Til' You Die) model has been released through whitepapers, ranging from BG-NBD (Beta Geometric Negative Binomial Distribution), PNBD (Pareto Negative Binomial Distribution) and up to the latest model being the PGGG (Pareto Gamma Gamma Gamma) model. In this repo, the goal is to build the popular model (BGNBD) and the gold standard model (PNBD) model to compare with the traditional Cohort-based CLV estimating model. Additionally, some way to deliver actionable insights is provided at the end.
 
 ### The Models
 The BTYD Family models assume that customers that are in non-contractual situations will have their own unique purchasing signal and would eventually die off (i.e.: churn or lapse) from purchasing. To model these signals, the popular model - BGNBD assumes that the customers' lifetime of purchasing follows a Beta Gamma distribution while the frequency of purchasing is based on a Negative Binomial Distribution. These parameters are estimated according to each customer's purchasing signals across the entire customer base to create a model that predicts: 
@@ -10,7 +10,7 @@ The BTYD Family models assume that customers that are in non-contractual situati
   (ii) probability that a customer will be alive (not lapsed and still purchasing) at a certain period of time
   (iii) using their average purchasing value, multiply this by their expected number of transaction to get their expected Customer Lifetime Value (CLV) for a certain duration of a period. 
   
-For the purpose of research and simple model building, all models were assumed to predict only 1 year of CLV. PNBD model was assumed simiarly as well but did use a calibration (training) and holdout (validation) period breaks to tune the model. 
+For the purpose of research and simple model building, all models were assumed to predict only 1 year of CLV. PNBD model was assumed similarly as well but did use a calibration (training) and holdout (validation) period breaks to tune the model. 
 
 For the Cohort-based model, a few assumptions were made:
  - Customers that join at a certain period (e.g.: date, month, year, etc.) is under "a cohort group." 
@@ -22,7 +22,7 @@ Both BG-NBD and PNBD have a much lower level of error (Squared Sum of Error) com
 
 As seen in error comparison in respect to the actuals, BG-NBD and PNBD comes much closer to the actual 1-year holdout period spend compared to the cohort-based estimates. BG-NBD and PNBD could be further improved with the following:
  - Have a calibration/holdout period to train and validate the model (for BG-NBD, this was not done for the sake of quickly/simply building the model) 
- - Larger (or longer) data that includes more transactions from the customers. Arguably, BTYD models have a weakness when not enough data (or not enough transaction) is available from a customer's transaction history. Havign more data could improve the accuracy of the model.
+ - Larger (or longer) data that includes more transactions from the customers. Arguably, BTYD models have a weakness when not enough data (or not enough transaction) is available from a customer's transaction history. Having more data could improve the accuracy of the model.
 
 ### Applications 
 Using the BG-NBD model's predicted 1-year CLV, the following analyses can be performed to extract the following insights:
